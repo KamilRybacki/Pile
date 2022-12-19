@@ -40,9 +40,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dawidd6/action-ansible-playbook@v2
         with:
-          playbook: tests/storage/test-lvm.yml
-          inventory: tests/storage/hosts.yml
-          options: --inventory hosts.yml
+          playbook: tests/storage/main.yml
+          inventory: hosts.yml
 
   cleanup:
     needs: set-up-disks
