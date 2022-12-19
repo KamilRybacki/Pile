@@ -19,7 +19,7 @@ jobs:
               -path "./roles/*" -name "*.yml" \
               -o -path "./tests/*" -name "*.yml" \
               -o -name "pile.yml" \
-              -exec ansible-lint --syntax-check {} +
+              -exec ansible-lint {} +
 
   set-up-disks:
     needs: lint-ansible
