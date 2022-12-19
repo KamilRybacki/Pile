@@ -44,7 +44,7 @@ jobs:
           options: --inventory /hosts.yml
 
   cleanup:
-    needs: set-up-disks
+    needs: test-lvm
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
