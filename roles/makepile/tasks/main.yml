@@ -3,13 +3,14 @@
   ansible.builtin.shell: "docker-compose -v > /dev/null 2>&1"
   register: is_docker_compose_installed
   ignore_errors: true
+  changed_when: true
 
 - name: Install Pile dependencies
-  include_tasks: install-dependencies.yml
+  ansible.builtin.include_tasks: install-dependencies.yml
   when: is_docker_compose_installed.rc != 0
 
 - name: Create LVM volume group with specified devices
-  include_role:
+  ansible.builtin.include_role:
     name: lvm
   vars:
     vg_name: "{{ pile_lvm_name }}"
