@@ -1,0 +1,48 @@
+name: Set up emulated disks
+
+on: [push]
+
+jobs:
+  set-up-disks:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      run: |
+        apt-get update
+        apt-get install -y python3 python3-pip
+    - name: Install dependencies
+      run: pip3 install subprocess
+    - name: Set up emulated disks
+      run: python3 tests/storage/assets/dummy_disks.py setup 4
+
+  test-lvm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install ansible
+        uses: actions/setup-ansible@v2
+      - name: Write Ansible configuation
+        run: |
+          echo "[defaults]" >> ansible.cfg
+          echo "inventory = ./hosts.yml" >> ansible.cfg
+      - name: Run ansible playbook
+        run: ansible-playbook /tests/storage/test-lvm.yml
+
+  cleanup:
+    needs: set-up-disks
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      run: |
+        apt-get update
+        apt-get install -y python3 python3-pip
+    - name: Install dependencies
+      run: pip3 install subprocess
+    - name: Clean up loop devices
+      run: python3 tests/storage/cleanup_loop_devices.py cleanup
