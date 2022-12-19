@@ -19,14 +19,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install ansible
-        uses: actions/setup-ansible@v2
-      - name: Write Ansible configuation
-        run: |
-          echo "[defaults]" >> ansible.cfg
-          echo "inventory = ./hosts.yml" >> ansible.cfg
-      - name: Run ansible playbook
-        run: ansible-playbook /tests/storage/test-lvm.yml
+      - uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: tests/storage/test-lvm.yml
+          inventory: tests/storage/hosts.yml
+          options: --inventory hosts.yml
 
   cleanup:
     needs: set-up-disks
