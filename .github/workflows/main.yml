@@ -41,7 +41,7 @@ jobs:
       - uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: tests/storage/main.yml
-          inventory: hosts.yml
+          options: --inventory /hosts.yml
 
   cleanup:
     needs: set-up-disks
@@ -54,3 +54,5 @@ jobs:
         sudo apt-get install -y python3 python3-pip
     - name: Clean up loop devices
       run: python3 tests/storage/dummy_disks.py cleanup
+    - name: Remove generated hosts file
+      run: rm -f /hosts.yml
