@@ -1,2 +1,4 @@
 # Pile
-An Ansible playbook to quickly setup a MinIO-based S3 storage on RPI i.e. quickly pile up random HDDs/SSDs
+
+An Ansible playbook to quickly setup a S3 storage on a RPI,
+without using single-node Kubernetes.
