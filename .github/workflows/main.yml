@@ -3,7 +3,26 @@ name: Set up emulated disks
 on: [push]
 
 jobs:
+  lint-ansible:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+      - name: Install ansible-lint
+        run: pip3 install ansible-lint
+      - name: Lint ansible files
+        run: |
+            find . \
+              -path "./roles/*" -name "*.yml" \
+              -o -path "./tests/*" -name "*.yml" \
+              -o -name "pile.yml" \
+              -exec ansible-lint --syntax-check {} +
+
   set-up-disks:
+    needs: lint-ansible
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
