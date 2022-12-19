@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Set up udevadm monitor to watch for changes to block devices
+udevadm monitor --property --kernel | while read -r line; do
+  # Check if a hard drive has been disconnected
+  if echo "$line" | grep -q "ID_BUS=ata.*remove"; then
+    # Deactivate the LVM volume group
+    vg=$(lvm vgs --noheadings -o vg_name | tr -d ' ')
+    lvm vgchange -an $vg
+
+    # Kill all processes that are using the logical volume
+    mount_point=$(lvm lvs --noheadings -o mountpoint | tr -d ' ')
+    fuser -km $mount_point
+
+    # Unmount the mount point
+    umount $mount_point
+  fi
+done

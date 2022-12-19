@@ -1,0 +1,24 @@
+---
+- name: Copy the observer script
+  copy:
+    src: "{{ role_path }}/files/lv-observer"
+    dest: "/bin/observer"
+    mode: 0755
+  become: true
+
+- name: Copy the observer service file
+  copy:
+    src: "{{ role_path }}/files/lv-observer.service"
+    dest: "/etc/systemd/system/lv-observer.service"
+    mode: 0644
+  become: true
+
+- name: Enable the observer service
+  systemd:
+    name: observer
+    enabled: yes
+    state: started
+  become: true
+
+- debug:
+    msg: "Observer service is running"

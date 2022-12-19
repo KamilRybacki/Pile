@@ -1,0 +1,28 @@
+---
+- include_tasks: 01-prepare-env.yml
+
+- include_tasks: 02-prepare-disks.yml
+  loop: "{{ disks }}"
+  loop_control:
+    loop_var: disk
+
+- name: Check if LVM data volume exists
+  shell: "lvdisplay | grep {{ pile_vg_name }}"
+  become: true
+  register: lvm_volume_check
+  ignore_errors: true
+
+- debug:
+    msg: "LVM volume {{ pile_vg_name }}-data exists"
+  when: not lvm_volume_check.stdout == ''
+
+- include_tasks: 03-setup-lvm.yml
+  when: lvm_volume_check.stdout == ''
+
+- name: Check if the Logical Volume observer service is running
+  shell: "systemctl status observer | grep 'Active: active'"
+  become: true
+  register: observer_status
+
+- include_tasks: 04-create-an-observer.yml
+  when: observer_status.stdout == ''

@@ -1,0 +1,9 @@
+[Unit]
+Description=Observer for physical disk disconnection
+
+[Service]
+Type=simple
+ExecStart=/bin/lv-observer
+
+[Install]
+WantedBy=multi-user.target
