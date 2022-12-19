@@ -1,10 +1,29 @@
 ---
-- name: Show contents of generated inventory
-  ansible.builtin.shell:
-    cmd: cat '/home/runner/work/Pile/Pile/hosts.yml'
-
-- name: Setup LVM
-  ansible.builtin.include_role: setup
-
-- name: Test LVM
-  ansible.builtin.include_role: test
+- hosts: pilehost
+  pre_tasks:
+    - name: Show contents of generated inventory
+      ansible.builtin.shell:
+        cmd: cat '/home/runner/work/Pile/Pile/hosts.yml'
+  roles:
+    - { role: '/home/runner/work/Pile/Pile/roles/lvm' }
+  post_tasks:
+    - name: Check if LVM named "{{ pile_vg_name }}" exists
+      shell: lvm vgs --noheadings -o vg_name | grep "^{{ pile_vg_name }}$"
+      register: lvm_exists
+      changed_when: false
+    - name: Fail if LVM does not exist
+      fail:
+        msg: LVM named "{{ pile_vg_name }}" does not exist
+      when: lvm_exists.stdout == ""
+    - name: Get list of devices connected to LVM logical volume
+      shell: sudo lvm lvs -S vg_name=pilevg -o devices --noheadings | sed 's/(.*)/ /g'
+      register: lvm_devices
+    - name: Choose random device from list of devices to be disconnected
+      set_fact:
+        device_to_disconnect: "{{ lvm_devices.stdout_lines | random }}"
+    - name: Disconnect device manually from its mount point
+      shell: sudo umount "{{ device_to_disconnect }}"
+    - name: Check if the previous LVM is still active
+      shell: sudo lvm vgs --noheadings -o vg_name | grep "^{{ pile_vg_name }}$"
+      register: lvm_exists
+      changed_when: false

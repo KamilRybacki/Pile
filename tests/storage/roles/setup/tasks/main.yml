@@ -1,7 +1,0 @@
----
-- name: Use LVM role to create a volume group
-  hosts: pilehost
-  become: true
-  become_user: root
-  roles:
-    { role: '/home/runner/work/Pile/Pile/roles/lvm'}
