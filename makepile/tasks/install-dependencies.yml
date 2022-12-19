@@ -1,0 +1,39 @@
+---
+- name: Install docker-compose using pip
+  pip:
+    name: docker-compose
+    sudo: yes
+
+- name: Check if Docker Compose installed successfully
+  shell: "docker-compose -v"
+  register: docker_compose_check
+  failed_when: docker_compose_check.rc != 0
+
+- debug:
+    msg: "Docker Compose installed successfully"
+
+- name: Check if Docker is installed
+  shell: "docker > /dev/null 2>&1"
+  register: is_docker_installed
+  ignore_errors: True
+  failed_when: is_docker_installed.rc != 0
+
+- name: Create Docker group
+  group:
+    name: docker
+    state: present
+
+- name: Add "{{ pile_username }}" to Docker group
+  user:
+    name: "{{ pile_username }}"
+    groups: docker
+    append: yes
+
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- debug:
+    msg: "Docker installed and setup successfully"

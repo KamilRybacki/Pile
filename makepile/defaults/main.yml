@@ -1,0 +1,3 @@
+docker_compose_repo: https://github.com/docker/compose
+docker_compose_version: 1.21.2
+docker_compose_binary_path: /usr/local/bin/docker-compose
