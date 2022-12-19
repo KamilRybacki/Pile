@@ -1,0 +1,10 @@
+---
+- name: Show contents of generated inventory
+  ansible.builtin.shell:
+    cmd: cat '/home/runner/work/Pile/Pile/hosts.yml'
+
+- name: Setup LVM
+  ansible.builtin.include_role: setup
+
+- name: Test LVM
+  ansible.builtin.include_role: test
