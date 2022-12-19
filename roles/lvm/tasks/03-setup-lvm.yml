@@ -1,31 +1,31 @@
 ---
 - name: Install lvm2 dependency
-  package:
+  ansible.builtin.package:
     name: lvm2
     state: present
 
 - name: Create LVM and add formatted devices
-  lvg:
+  community.general.lvg:
     vg: "{{ pile_vg_name }}"
     pvs: "{{ disks | product(['1']) | map('join','') | join(' ') }}"
     state: present
   register: lvm_create
 
 - name: Create LVM volume
-  lvol:
+  community.general.lvol:
     vg: "{{ pile_vg_name }}"
     lv: data
     size: 100%FREE
     state: present
 
 - name: Create filesystem on LVM volume
-  filesystem:
+  community.general.filesystem:
     fstype: "{{ mount_filesystem }}"
     dev: "/dev/mapper/{{ pile_vg_name }}-data"
     force: yes
 
 - name: Create mount point for LVM volume
-  file:
+  ansible.builtin.file:
     path: "{{ s3_combined_volume }}"
     state: directory
     owner: "{{ pile_username }}"
@@ -33,7 +33,7 @@
     mode: "{{ mount_mode }}"
 
 - name: Mount the LVM volume to {{ s3_combined_volume }}
-  mount:
+  ansible.builtin.mount:
     path: "{{ s3_combined_volume }}"
     src: "/dev/mapper/{{ pile_vg_name }}-data"
     fstype: "{{ mount_filesystem }}"
@@ -41,7 +41,7 @@
     state: mounted
 
 - name: To be sure, change permissions AGAIN on mount point as previously
-  file:
+  ansible.builtin.file:
     path: "{{ s3_combined_volume }}"
     owner: "{{ pile_username }}"
     group: "{{ pile_group }}"

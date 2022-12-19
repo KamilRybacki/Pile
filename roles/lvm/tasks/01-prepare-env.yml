@@ -1,23 +1,23 @@
 ---
 - name: Prepare dummy fstab
-  copy:
+  ansible.builtin.copy:
     content: "This is a dummy fstab file"
     dest: "{{ fstab_file }}"
 
 - name: Create user named "{{ pile_username }}" if it doesn't exist
-  user:
+  ansible.builtin.user:
     name: "{{ pile_username }}"
     state: present
   when: pile_username is defined
 
 - name: Create group named "{{ pile_group }}" if it doesn't exist
-  group:
+  ansible.builtin.group:
     name: "{{ pile_group }}"
     state: present
   when: pile_group is defined
 
 - name: Add {{ pile_username }} to group {{ pile_group }}
-  user:
+  ansible.builtin.user:
     name: "{{ pile_username }}"
     groups: "{{ pile_group }}"
     append: yes

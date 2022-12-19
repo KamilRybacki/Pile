@@ -1,18 +1,11 @@
 ---
-- debug:
-    msg: "Checking disk {{ disk }}"
-
 - name: Check if hard drive is formatted for Linux LVM
-  shell: "fdisk -l {{ disk }} | grep 8e"
+  ansible.builtin.shell: "fdisk -l {{ disk }} | grep 8e"
   register: lvm_check
   ignore_errors: true
 
-- debug:
-    msg: "Disk was already formatted for use in Linux LVM"
-  when: lvm_check.stdout != ''
-
 - name: Format hard drive for Linux LVM
-  parted:
+  community.general.parted:
     device: "{{ disk }}"
     flags: [ lvm ]
     state: present
@@ -20,7 +13,7 @@
   when: lvm_check.stdout == ''
 
 - name: Prepare formatted device for LVM
-  shell: "pvcreate {{ disk }}1"
+  ansible.builtin.shell: "pvcreate {{ disk }}1"
   args:
     creates: "{{ disk }}1"
   register: lvm_prepare

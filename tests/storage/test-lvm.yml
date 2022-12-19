@@ -9,7 +9,7 @@
 - name: Check if LVM named "{{ pile_vg_name }}" exists
   shell: lvm vgs --noheadings -o vg_name | grep "^{{ pile_vg_name }}$"
   register: lvm_exists
-  changed_when: False
+  changed_when: false
 
 - name: Fail if LVM does not exist
   fail:
@@ -30,4 +30,4 @@
 - name: Check if the previous LVM is still active
   shell: sudo lvm vgs --noheadings -o vg_name | grep "^{{ pile_vg_name }}$"
   register: lvm_exists
-  changed_when: False
+  changed_when: false

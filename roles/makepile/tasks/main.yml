@@ -1,8 +1,8 @@
 ---
 - name: Try using Docker Compose to check if it's installed
-  shell: "docker-compose -v > /dev/null 2>&1"
+  ansible.builtin.shell: "docker-compose -v > /dev/null 2>&1"
   register: is_docker_compose_installed
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Install Pile dependencies
   include_tasks: install-dependencies.yml
