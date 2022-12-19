@@ -4,7 +4,7 @@
   become: true
   become_user: root
   roles:
-    - lvm
+    - { role: ../roles/lvm }
 
 - name: Check if LVM named "{{ pile_vg_name }}" exists
   shell: lvm vgs --noheadings -o vg_name | grep "^{{ pile_vg_name }}$"
