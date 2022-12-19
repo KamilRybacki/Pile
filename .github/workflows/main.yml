@@ -9,8 +9,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up Python
       run: |
-        apt-get update
-        apt-get install -y python3 python3-pip
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
     - name: Set up emulated disks
       run: python3 tests/storage/dummy_disks.py setup 4
 
@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up Python
       run: |
-        apt-get update
-        apt-get install -y python3 python3-pip
+        sudo apt-get update
+        sudo apt-get install -y python3 python3-pip
     - name: Clean up loop devices
       run: python3 tests/storage/dummy_disks.py cleanup
