@@ -57,13 +57,10 @@ jobs:
             output=$(echo "${ANSIBLE_OUTPUT}")
             for error in "${split_error_messages[@]}"; do
               if grep -q "$string" <<< "$output"; then
+                echo "Error message '$error' found in output"
                 exit 1
               fi
             done
-        on_failure:
-          - fail:
-              message: "There are false positives in the output of ansible-playbook"
-              context: "ansible-playbook"
 
   cleanup:
     needs: test-lvm
