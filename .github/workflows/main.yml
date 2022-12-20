@@ -53,7 +53,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
       - name: Check if there are no false positives
         run: |
-            split_error_messages=($(echo "${ERROR_MESSAGES}" | tr '\n' ' '))
+            split_error_messages=($(echo "${ERROR_MESSAGES}" | tr '\n'))
             output=$(echo "${ANSIBLE_OUTPUT}")
             for error in "${split_error_messages[@]}"; do
               if grep -q "$string" <<< "$output"; then
