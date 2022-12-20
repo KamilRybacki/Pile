@@ -41,7 +41,17 @@ jobs:
       - uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: tests/storage/main.yml
-          options: --inventory /hosts.yml
+          options: --inventory hosts.yml
+      - name: Check for skipped tasks
+        run: |
+          if grep -q '^No inventory was parsed' playbook.retry; then
+            echo "Could not parse inventory file."
+            exit 1
+          fi
+          if grep -q '^skipping: no hosts matched' playbook.retry; then
+            echo "Hosts were skipped. Check playbook inventory."
+            exit 1
+          fi
 
   cleanup:
     needs: test-lvm
