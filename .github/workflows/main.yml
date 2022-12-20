@@ -1,6 +1,10 @@
 name: Setup and test LVM storage role with emulated disks
 
 on: [push]
+env:
+  EMULATED_DISK_SIZE: 10M
+  NUMBER_OF_EMULATED_DISKS: 4
+  ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
 
 jobs:
   lint-ansible:
@@ -31,12 +35,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3 python3-pip
     - name: Set up emulated disks
-      env:
-        DISK_SIZE: 1G
-        NUM_DISKS: 4
-      run: python3 tests/storage/dummy_disks.py setup $DISK_SIZE $NUM_DISKS
+      run: python3 tests/storage/dummy_disks.py setup \
+            ${{ env.EMULATED_DISK_SIZE }} \
+            ${{ env.NUMBER_OF_EMULATED_DISKS }} \
+            ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
-      run: ls -l /dev/loop* | wc -l | grep 4
+      run: ls -l /dev/loop* | wc -l | grep ${{ env.NUMBER_OF_EMULATED_DISKS }}
+    - name: Check if Ansible inventory file was created
+      run: ls -l ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} | wc -l | grep 1
 
   test-lvm:
     needs: set-up-disks
@@ -47,7 +53,7 @@ jobs:
         id: lvm-ansible-playbook
         with:
           playbook: tests/storage/main.yml
-          options: --inventory hosts.yml
+          options: --inventory ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
 
   cleanup:
     needs: test-lvm
@@ -61,4 +67,4 @@ jobs:
     - name: Clean up loop devices
       run: python3 tests/storage/dummy_disks.py cleanup
     - name: Remove generated hosts file
-      run: rm -f /hosts.yml
+      run: rm -f ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
