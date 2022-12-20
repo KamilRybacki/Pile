@@ -5,16 +5,16 @@ env:
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
+  DISKS_SETUP_ARGS: ${{ env.EMULATED_DISK_SIZE }} ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3.10
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
       - name: Install linters
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
@@ -34,14 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y python3 python3-pip
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.10
     - name: Set up emulated disks
-      env:
-        SETUP_ARGS: ${{ env.EMULATED_DISK_SIZE }} ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
-      run: python3 tests/storage/dummy_disks.py setup $SETUP_ARGS
+      run: python3.10 tests/storage/dummy_disks.py setup ${{ env.DISKS_SETUP_ARGS }}
     - name: Show contents of Ansible inventory file
       run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
@@ -52,6 +49,6 @@ jobs:
         playbook: tests/storage/main.yml
         options: --inventory ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Clean up loop devices
-      run: python3 tests/storage/dummy_disks.py cleanup
+      run: python3.10 tests/storage/dummy_disks.py cleanup
     - name: Remove generated hosts file
       run: rm -f ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
