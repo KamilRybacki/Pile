@@ -57,8 +57,7 @@ jobs:
             output=$(echo "${ANSIBLE_OUTPUT}")
             for error in "${split_error_messages[@]}"; do
               if grep -q "$string" <<< "$output"; then
-                outputs.flag='false'
-                break
+                exit 1
               fi
             done
 
