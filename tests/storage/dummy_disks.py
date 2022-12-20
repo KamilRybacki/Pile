@@ -89,7 +89,11 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
 if __name__ == "__main__":
     if len(sys.argv) < 1:
         raise ValueError("You must provide a command: setup or cleanup")
+
     logging.basicConfig(level=logging.INFO)
+    handler = logging.StreamHandler(sys.stdout)
+    DISKS_SETUP_LOG.addHandler(handler)
+
     if sys.argv[0] == "cleanup":
         cleanup_loop_devices()
     if sys.argv[0] == "setup":
@@ -97,14 +101,17 @@ if __name__ == "__main__":
         if number_of_disks is None or input_disk_size is None:
             DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
             sys.exit(1)
+
         disks = setup_dummy_disks(number_of_disks, input_disk_size)
         if len(disks) == 0:
             DISKS_SETUP_LOG.error("No disks were created! Exiting...")
             sys.exit(1)
+
         output_file_path: str = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_HOSTS_FILE_PATH
         try:
             open(output_file_path, "w", encoding='utf-8').close()
         except OSError:
             DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
             sys.exit(1)
+
         write_inventory_file_for_ansible(disks, output_file_path)
