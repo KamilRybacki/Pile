@@ -1,9 +1,6 @@
 ---
 - hosts: all
   tasks:
-    - name: Show contents of generated inventory
-      ansible.builtin.shell:
-        cmd: cat '/home/runner/work/Pile/Pile/hosts.yml'
     - name: Check if hosts from inventory file were parsed correctly
       ansible.builtin.assert:
         that:

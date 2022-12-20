@@ -39,10 +39,10 @@ jobs:
             ${{ env.EMULATED_DISK_SIZE }} \
             ${{ env.NUMBER_OF_EMULATED_DISKS }} \
             ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+    - name: Show contents of Ansible inventory file
+      run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
       run: ls -l /dev/loop* | wc -l | grep ${{ env.NUMBER_OF_EMULATED_DISKS }}
-    - name: Check if Ansible inventory file was created
-      run: ls -l ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} | wc -l | grep 1
 
   test-lvm:
     needs: set-up-disks
