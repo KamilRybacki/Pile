@@ -1,4 +1,4 @@
-name: Set up emulated disks
+name: Setup and test LVM storage role with emulated disks
 
 on: [push]
 
@@ -43,24 +43,6 @@ jobs:
         with:
           playbook: tests/storage/main.yml
           options: --inventory hosts.yml
-      - name: Get output from ansible-playbook
-        run: echo "ANSIBLE_OUTPUT=${{ steps.lvm-ansible-playbook.outputs.stdout }}" >> $GITHUB_ENV
-      - name: Define list of error messages
-        run: |
-          echo "ERROR_MESSAGES<<EOF" >> $GITHUB_ENV
-          echo "No inventory was parsed" >> $GITHUB_ENV
-          echo "skipping: no hosts matched" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      - name: Check if there are no false positives
-        run: |
-            split_error_messages=($(echo "${ERROR_MESSAGES}" | tr '\n'))
-            output=$(echo "${ANSIBLE_OUTPUT}")
-            for error in "${split_error_messages[@]}"; do
-              if grep -q "$string" <<< "$output"; then
-                echo "Error message '$error' found in output"
-                exit 1
-              fi
-            done
 
   cleanup:
     needs: test-lvm
