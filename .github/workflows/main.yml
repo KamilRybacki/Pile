@@ -35,10 +35,9 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3 python3-pip
     - name: Set up emulated disks
-      run: python3 tests/storage/dummy_disks.py setup \
-            ${{ env.EMULATED_DISK_SIZE }} \
-            ${{ env.NUMBER_OF_EMULATED_DISKS }} \
-            ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+      env:
+        SETUP_ARGS: ${{ env.EMULATED_DISK_SIZE }} ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+      run: python3 tests/storage/dummy_disks.py setup $SETUP_ARGS
     - name: Show contents of Ansible inventory file
       run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
