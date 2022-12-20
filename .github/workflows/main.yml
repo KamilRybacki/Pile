@@ -39,19 +39,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dawidd6/action-ansible-playbook@v2
+        id: lvm-ansible-playbook
         with:
           playbook: tests/storage/main.yml
           options: --inventory hosts.yml
-      - name: Check for skipped tasks
+      - name: Check if there are no false positives
+        env:
+          ERROR_MESSAGES: '
+            No inventory was parsed |
+            skipping: no hosts matched'
         run: |
-          if grep -q '^No inventory was parsed' playbook.retry; then
-            echo "Could not parse inventory file."
-            exit 1
-          fi
-          if grep -q '^skipping: no hosts matched' playbook.retry; then
-            echo "Hosts were skipped. Check playbook inventory."
-            exit 1
-          fi
+            split_error_messages = $(echo "${ERROR_MESSAGES}" | tr "|" "\n")
+            output=$(echo "${steps.lvm-ansible-playbook.outputs.stdout}")
+            for error in "${split_error_messages[@]}"; do
+              if grep -q "$string" <<< "$output"; then
+                outputs.flag='false'
+                break
+              fi
+            done
 
   cleanup:
     needs: test-lvm
