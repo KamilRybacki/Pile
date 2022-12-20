@@ -43,14 +43,17 @@ jobs:
         with:
           playbook: tests/storage/main.yml
           options: --inventory hosts.yml
-      - name: Check if there are no false positives
-        env:
-          ERROR_MESSAGES: '
-            No inventory was parsed |
-            skipping: no hosts matched'
+      - name: Get output from ansible-playbook
+        run: echo "::set-env name=ANSIBLE_OUTPUT::${{ steps.lvm-ansible-playbook.outputs.stdout }}"
+      - name: Define list of error messages
         run: |
-            split_error_messages=$(echo "${ERROR_MESSAGES}" | tr "|" "\n")
-            output=$(echo "${steps.lvm-ansible-playbook.outputs.stdout}")
+          echo "::set-env-multiline name=ERROR_MESSAGES::"
+          echo "No inventory was parsed"
+          echo "skipping: no hosts matched"
+      - name: Check if there are no false positives
+        run: |
+            split_error_messages=$(echo "${ERROR_MESSAGES}" | tr "\n")
+            output=$(echo "${ANSIBLE_OUTPUT}")
             for error in "${split_error_messages[@]}"; do
               if grep -q "$string" <<< "$output"; then
                 outputs.flag='false'
