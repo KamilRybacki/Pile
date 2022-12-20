@@ -44,12 +44,13 @@ jobs:
           playbook: tests/storage/main.yml
           options: --inventory hosts.yml
       - name: Get output from ansible-playbook
-        run: echo "::set-env name=ANSIBLE_OUTPUT::${{ steps.lvm-ansible-playbook.outputs.stdout }}"
+        run: echo "ANSIBLE_OUTPUT=${{ steps.lvm-ansible-playbook.outputs.stdout }}" >> $GITHUB_ENV
       - name: Define list of error messages
         run: |
-          echo "::set-env-multiline name=ERROR_MESSAGES::"
-          echo "No inventory was parsed"
-          echo "skipping: no hosts matched"
+          echo "ERROR_MESSAGES<<EOF" >> $GITHUB_ENV
+          echo "No inventory was parsed" >> $GITHUB_ENV
+          echo "skipping: no hosts matched" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
       - name: Check if there are no false positives
         run: |
             split_error_messages=$(echo "${ERROR_MESSAGES}" | tr "\n")
