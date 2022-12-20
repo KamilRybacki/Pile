@@ -60,6 +60,10 @@ jobs:
                 exit 1
               fi
             done
+        on_failure:
+          - fail:
+              message: "There are false positives in the output of ansible-playbook"
+              context: "ansible-playbook"
 
   cleanup:
     needs: test-lvm
