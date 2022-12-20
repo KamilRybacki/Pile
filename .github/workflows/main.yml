@@ -5,7 +5,6 @@ env:
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
-  DISKS_SETUP_ARGS: "${EMULATED_DISK_SIZE} ${NUMBER_OF_EMULATED_DISKS} ${ANSIBLE_INVENTORY_FILE_PATH}"
 
 jobs:
   lint:
@@ -38,7 +37,7 @@ jobs:
       with:
         python-version: '3.10'
     - name: Set up emulated disks
-      run: python3.10 tests/storage/dummy_disks.py setup ${{ env.DISKS_SETUP_ARGS }}
+      run: python3.10 tests/storage/dummy_disks.py setup ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.EMULATED_DISK_SIZE }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Show contents of Ansible inventory file
       run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
