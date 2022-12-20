@@ -49,7 +49,7 @@ jobs:
             No inventory was parsed |
             skipping: no hosts matched'
         run: |
-            split_error_messages = $(echo "${ERROR_MESSAGES}" | tr "|" "\n")
+            split_error_messages=$(echo "${ERROR_MESSAGES}" | tr "|" "\n")
             output=$(echo "${steps.lvm-ansible-playbook.outputs.stdout}")
             for error in "${split_error_messages[@]}"; do
               if grep -q "$string" <<< "$output"; then
