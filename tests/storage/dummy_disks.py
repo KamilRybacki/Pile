@@ -115,7 +115,8 @@ if __name__ == "__main__":
 
         output_file_path: str = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_HOSTS_FILE_PATH
         try:
-            open(output_file_path, "w", encoding='utf-8').close()
+            with open(output_file_path, "w", encoding='utf-8'):
+                pass
         except OSError:
             DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
             sys.exit(1)
