@@ -8,6 +8,7 @@ DEFAULT_HOSTS_FILE_PATH = "/hosts.yml"
 
 DISKS_SETUP_LOG = logging.getLogger("DISKS")
 
+
 def cleanup_loop_devices() -> None:
     def decode_loop_device_paths(paths: subprocess.CompletedProcess[bytes]) -> list[str]:
         return paths.stdout.decode().strip().split("\n")
@@ -20,6 +21,7 @@ def cleanup_loop_devices() -> None:
     for loop_device in loop_devices:
         DISKS_SETUP_LOG.info(f"Cleaning up {loop_device}")
         subprocess.run(["sudo", "losetup", "-d", loop_device], check=True)
+
 
 def get_loop_devices_setup_config(arguments: list[str]) -> tuple[int | None, str | None]:
     if len(arguments) == 1:
@@ -49,6 +51,7 @@ def get_loop_devices_setup_config(arguments: list[str]) -> tuple[int | None, str
         size = None
     return n_disks, size
 
+
 def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str]:
     DISKS_SETUP_LOG.info(f"Setting up {number_of_disks_to_setup} disks of size {disk_size}")
     loop_devices = [setup_dummy_disk(i, disk_size) for i in range(number_of_disks_to_setup)]
@@ -59,6 +62,7 @@ def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str
     DISKS_SETUP_LOG.info(loop_devices)
     return loop_devices
 
+
 def setup_dummy_disk(index: int, size: str) -> str:
     loop_device_source: str = f"loop_device{index}.img"
     loop_device_path: str = f"/dev/loop{index}"
@@ -66,6 +70,7 @@ def setup_dummy_disk(index: int, size: str) -> str:
     subprocess.run(['truncate', '-s', size, loop_device_source], check=True)
     subprocess.run(["sudo", "losetup", loop_device_path, loop_device_source], check=True)
     return loop_device_path
+
 
 def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
     DISKS_SETUP_LOG.info(f"Writing inventory file to {path}")
@@ -85,6 +90,7 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
         for device in devices:
             inventory_file.write(f"\t\t\t\t - {device}")
         inventory_file.write("\t\t\t s3_combined_volume: /mnt/data")
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 1:
