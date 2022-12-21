@@ -34,21 +34,22 @@ def get_loop_devices_setup_config(arguments: list[str]) -> tuple[int | None, str
     n_disks: int | None = int(arguments[0]) if len(sys.argv) > 1 else DEFAULT_NUMBER_OF_DISKS
     size: str | None = arguments[1] if len(sys.argv) > 2 else DEFAULT_DISK_SIZE
 
-    if n_disks < 1:
+    if n_disks is not None and n_disks < 1:
         DISKS_SETUP_LOG.error("You must provide a number of disks greater than 0")
         n_disks = None
-    if size[-1] not in ['M', 'G', 'T']:
-        DISKS_SETUP_LOG.error("You must provide a disk size with a unit of measure: M, G, T")
-        size = None
-    if size[-1] == 'T':
-        DISKS_SETUP_LOG.error("You must provide a disk size less than 1T")
-        size = None
-    if not size[:-1].isnumeric():
-        DISKS_SETUP_LOG.error("You must provide a disk size with a numeric value")
-        size = None
-    if int(size[:-1]) < 1:
-        DISKS_SETUP_LOG.error("You must provide a disk size greater than 0")
-        size = None
+    if size is not None:
+        if size[-1] not in ['M', 'G', 'T']:
+            DISKS_SETUP_LOG.error("You must provide a disk size with a unit of measure: M, G, T")
+            size = None
+        if size[-1] == 'T':
+            DISKS_SETUP_LOG.error("You must provide a disk size less than 1T")
+            size = None
+        if not size[:-1].isnumeric():
+            DISKS_SETUP_LOG.error("You must provide a disk size with a numeric value")
+            size = None
+        if int(size[:-1]) < 1:
+            DISKS_SETUP_LOG.error("You must provide a disk size greater than 0")
+            size = None
     return n_disks, size
 
 
