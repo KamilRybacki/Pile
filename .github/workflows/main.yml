@@ -54,6 +54,7 @@ jobs:
         run: mypy --config-file mypy.ini ${MODIFIED_PYTHON_FILES}
 
   test-lvm:
+    if: ${{ always() }}
     needs: [lint-ansible, lint-python]
     runs-on: ubuntu-latest
     steps:
