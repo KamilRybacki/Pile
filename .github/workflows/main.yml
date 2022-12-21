@@ -17,7 +17,7 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: ansible-lint -c ./ansible-lint-dev.yml ${MODIFIED_ANSIBLE_FILES}
+        run: ansible-lint -c ./ansible-lint-dev.yml $(git diff --name-only HEAD~1 | grep -E '\.ya?ml$')
   lint-python:
     runs-on: ubuntu-latest
     steps:
@@ -28,9 +28,9 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc ${MODIFIED_PYTHON_FILES}
+        run: flake8 . && pylint --rcfile=.pylintrc $(git diff --name-only HEAD~1 | grep -E '\.py$')
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini ${MODIFIED_PYTHON_FILES}
+        run: mypy --config-file mypy.ini $(git diff --name-only HEAD~1 | grep -E '\.py$')
 
   test-lvm:
     needs: [lint-ansible, lint-python]
