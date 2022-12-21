@@ -97,7 +97,7 @@ if __name__ == "__main__":
         if number_of_disks is None or input_disk_size is None:
             DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
             sys.exit(1)
-    else:
+    if sys.argv[0] not in ["setup", "cleanup"]:
         DISKS_SETUP_LOG.error('Invalid command. Available commands: setup, cleanup')
         sys.exit(1)
 
