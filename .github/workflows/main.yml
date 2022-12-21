@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ANSIBLE_FILES: $(find . -name '*.yml' | grep -v 'roles/.*')
-      MODIFIED_ANSIBLE_FILES: $(git diff ${{ env.TWO_LAST_COMMITS }} -- | ${{ env.ANSIBLE_FILE_CHECK }} | xargs -I{} bash -c 'echo "{}"')
+      MODIFIED_ANSIBLE_FILES: $(git diff ${TWO_LAST_COMMITS} -- | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"')
     if: env.MODIFIED_ANSIBLE_FILES != ''
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_FILES: $(find . -name '*.py')
-      MODIFIED_PYTHON_FILES: $(git diff ${{ env.TWO_LAST_COMMITS }} -- | grep -E '\.py$')
+      MODIFIED_PYTHON_FILES: $(git diff ${TWO_LAST_COMMITS} -- | grep -E '\.py$')
     if: env.MODIFIED_PYTHON_FILES != ''
     steps:
       - uses: actions/checkout@v3
