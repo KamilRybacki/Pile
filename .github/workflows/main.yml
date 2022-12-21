@@ -22,7 +22,7 @@ jobs:
   lint-ansible:
     runs-on: ubuntu-latest
     needs: find-modified-files
-    if: contains(MODIFIED_ANSIBLE_FILES, 'yml')
+    if: contains($MODIFIED_ANSIBLE_FILES, 'yml')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -35,7 +35,7 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     needs: find-modified-files
-    if: contains(MODIFIED_PYTHON_FILES, '.py')
+    if: contains($MODIFIED_PYTHON_FILES, '.py')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
