@@ -86,6 +86,7 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
 
 
 if __name__ == "__main__":
+    DISKS_SETUP_LOG.debug(sys.argv)
     if len(sys.argv) < 1:
         raise ValueError("You must provide a command: setup or cleanup")
 
