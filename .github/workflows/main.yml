@@ -34,7 +34,7 @@ jobs:
           python-version: '3.10'
       - name: Check Python files
         id: python_files_check
-        run: git diff --name-only HEAD HEAD~ | grep -E '\.py$'
+        run: git diff --name-only HEAD HEAD~ -- | grep -E '\.py$'
       - name: Install Python linters
         if: steps.python_files_check.outcome == 'success'
         run: pip3.10 install flake8 pylint mypy
