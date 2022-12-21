@@ -101,7 +101,7 @@ if __name__ == "__main__":
         DISKS_SETUP_LOG.error('Invalid command. Available commands: setup, cleanup')
         sys.exit(1)
 
-    disks = setup_dummy_disks(number_of_disks, input_disk_size)
+    disks = setup_dummy_disks(number_of_disks, input_disk_size)  # type: ignore
     if len(disks) == 0:
         DISKS_SETUP_LOG.error("No disks were created! Exiting...")
         sys.exit(1)
