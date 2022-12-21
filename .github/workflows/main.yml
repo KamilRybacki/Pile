@@ -21,8 +21,6 @@ jobs:
         run: ansible-lint -c ./ansible-lint-dev.yml $( echo "${MODIFIED_FILES}" | grep -E ".*\.ya?ml$" )
   lint-python:
     runs-on: ubuntu-latest
-    env:
-      MODIFIED_PYTHON_FILES: $( echo "${MODIFIED_FILES}" | grep -E ".*\.py$" )
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -30,12 +28,15 @@ jobs:
           python-version: '3.10'
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
+      - name: Set modified Python files
+        run: |
+          echo "MODIFIED_PYTHON_FILES=$( echo "${MODIFIED_FILES}" | grep -E ".*\.py$" )" >> $GITHUB_ENV
       - name: Lint Python code style with flake8
         run: flake8 .
       - name: Lint Python code style with pylint
-        run: pylint --rcfile=.pylintrc ${{ env.MODIFIED_PYTHON_FILES }}
+        run: pylint --rcfile=.pylintrc ${MODIFIED_PYTHON_FILES}
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini ${{ env.MODIFIED_PYTHON_FILES }}
+        run: mypy --config-file mypy.ini ${MODIFIED_PYTHON_FILES}
 
   test-lvm:
     needs: [lint-ansible, lint-python]
