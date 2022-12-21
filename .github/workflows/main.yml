@@ -45,6 +45,7 @@ jobs:
             ${{ env.NUMBER_OF_EMULATED_DISKS }} \
             ${{ env.EMULATED_DISK_SIZE }} \
             ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} > setup.log 2>&1; echo $?)
+        echo "::set-output name=setup-log::${setup.log}"
     - name: Show setup log and contents of Ansible inventory file
       run: cat ${{ steps.setup-disks.outputs.setup-log }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
