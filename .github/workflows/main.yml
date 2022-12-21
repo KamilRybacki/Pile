@@ -11,11 +11,18 @@ env:
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
 
 jobs:
+  find-modified-files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Find modified files
+        run: |
+          echo "MODIFIED_ANSIBLE_FILES=$( ${{ env.MODIFIED_FILES }} | ${{ env.ANSIBLE_FILE_CHECK }} | xargs -I{} bash -c 'echo "{}"' )" >> $GITHUB_ENV
+          echo "MODIFIED_PYTHON_FILES=$( ${{ env.MODIFIED_FILES }} | grep -E '\.py$' )" >> $GITHUB_ENV
   lint-ansible:
     runs-on: ubuntu-latest
-    env:
-      MODIFIED_ANSIBLE_FILES: $( ${MODIFIED_FILES} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
-    if: contains("${{ env.MODIFIED_ANSIBLE_FILES }}", 'yml')
+    needs: find-modified-files
+    if: contains("${MODIFIED_ANSIBLE_FILES}", 'yml')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -27,9 +34,8 @@ jobs:
         run: ansible-lint -c ./ansible-lint-dev.yml ${MODIFIED_ANSIBLE_FILES}
   lint-python:
     runs-on: ubuntu-latest
-    env:
-      MODIFIED_PYTHON_FILES: $( ${MODIFIED_FILES} | grep -E '\.py$' )
-    if: contains("${{ env.MODIFIED_PYTHON_FILES }}", '.py')
+    needs: find-modified-files
+    if: contains("${MODIFIED_PYTHON_FILES}", '.py')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
