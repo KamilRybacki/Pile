@@ -25,6 +25,8 @@ jobs:
               -exec ansible-lint -c ./ansible-lint-dev.yml {} +
   lint-python:
     runs-on: ubuntu-latest
+    env:
+      PYTHON_FILES: "$(find . -name '*.py')"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -33,9 +35,9 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc $(find . -name "*.py")
+        run: flake8 . && pylint --rcfile=.pylintrc ${{ env.PYTHON_FILES }}
       - name: Check typing with mypy
-        run: mypy --config-file .mypy.ini $(find . -name "*.py")
+        run: mypy --config-file mypy.ini ${{ env.PYTHON_FILES }}
 
   test-lvm:
     needs: [lint-ansible, lint-python]
