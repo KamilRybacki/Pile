@@ -14,7 +14,7 @@ jobs:
     env:
       ANSIBLE_FILES: $(find . -name '*.yml' | grep -v 'roles/.*')
       MODIFIED_ANSIBLE_FILES: $(git diff ${TWO_LAST_COMMITS} -- | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"')
-    if: MODIFIED_ANSIBLE_FILES != ''
+    if: '${{ MODIFIED_ANSIBLE_FILES }}'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
     env:
       PYTHON_FILES: $(find . -name '*.py')
       MODIFIED_PYTHON_FILES: $(git diff ${TWO_LAST_COMMITS} -- | grep -E '\.py$')
-    if: MODIFIED_PYTHON_FILES != ''
+    if: '${{ MODIFIED_PYTHON_FILES }}'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
