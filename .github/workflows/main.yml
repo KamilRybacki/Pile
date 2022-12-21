@@ -2,19 +2,20 @@ name: Setup and test LVM storage role with emulated disks
 
 on: [push]
 env:
+  # The following variables are used to determine which files were modified (for linting purposes)
+  MODIFIED_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA)
+  ANSIBLE_FILE_CHECK: find . -name '*.yml' | xargs grep -A1 -B1 '^---.*- name:'
+  # The following variables are used by the dummy_disks.py script
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
-  TWO_LAST_COMMITS: --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA
-  ANSIBLE_FILE_CHECK: find . -name '*.yml' | xargs grep -A1 -B1 '^---.*- name:'
 
 jobs:
   lint-ansible:
     runs-on: ubuntu-latest
     env:
-      ANSIBLE_FILES: $(find . -name '*.yml' | grep -v 'roles/.*')
-      MODIFIED_ANSIBLE_FILES: $(git diff ${TWO_LAST_COMMITS} -- | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"')
-    if: '${{ env.MODIFIED_ANSIBLE_FILES }}'
+      MODIFIED_ANSIBLE_FILES: $( ${MODIFIED_FILES} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
+    if: "length(env.MODIFIED_ANSIBLE_FILES) > 0"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -23,13 +24,12 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: ansible-lint -c ./ansible-lint-dev.yml ${{ env.ANSIBLE_FILES }}
+        run: ansible-lint -c ./ansible-lint-dev.yml ${{ env.MODIFIED_ANSIBLE_FILES }}
   lint-python:
     runs-on: ubuntu-latest
     env:
-      PYTHON_FILES: $(find . -name '*.py')
-      MODIFIED_PYTHON_FILES: $(git diff ${TWO_LAST_COMMITS} -- | grep -E '\.py$')
-    if: '${{ env.MODIFIED_PYTHON_FILES }}'
+      MODIFIED_PYTHON_FILES: $( ${MODIFIED_FILES} | grep -E '\.py$' )
+    if: "length(env.MODIFIED_PYTHON_FILES) > 0"
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -38,9 +38,9 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc ${{ env.PYTHON_FILES }}
+        run: flake8 . && pylint --rcfile=.pylintrc ${{ env.MODIFIED_PYTHON_FILES }}
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini ${{ env.PYTHON_FILES }}
+        run: mypy --config-file mypy.ini ${{ env.MODIFIED_PYTHON_FILES }}
 
   test-lvm:
     needs: [lint-ansible, lint-python]
