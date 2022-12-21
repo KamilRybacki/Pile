@@ -5,10 +5,16 @@ env:
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
+  TWO_LAST_COMMITS: --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA
+  ANSIBLE_FILE_CHECK: find . -name '*.yml' | xargs grep -A1 -B1 '^---.*- name:'
 
 jobs:
   lint-ansible:
     runs-on: ubuntu-latest
+    env:
+      ANSIBLE_FILES: $(find . -name '*.yml' | grep -v 'roles/.*')
+      MODIFIED_ANSIBLE_FILES: $(git diff ${{ env.TWO_LAST_COMMITS }} -- | ${{ env.ANSIBLE_FILE_CHECK }} | xargs -I{} bash -c 'echo "{}"')
+    if: env.MODIFIED_ANSIBLE_FILES != ''
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -17,30 +23,23 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: |
-            find . \
-              -path "./roles/*" -name "*.yml" \
-              -o -path "./tests/*" -name "*.yml" \
-              -o -name "pile.yml" \
-              -exec ansible-lint -c ./ansible-lint-dev.yml {} +
+        run: ansible-lint -c ./ansible-lint-dev.yml ${{ env.ANSIBLE_FILES }}
   lint-python:
     runs-on: ubuntu-latest
     env:
       PYTHON_FILES: $(find . -name '*.py')
-      MODIFIED_PYTHON_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA -- | grep -E '\.py$')
+      MODIFIED_PYTHON_FILES: $(git diff ${{ env.TWO_LAST_COMMITS }} -- | grep -E '\.py$')
+    if: env.MODIFIED_PYTHON_FILES != ''
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
       - name: Install Python linters
-        if: env.MODIFIED_PYTHON_FILES != ''
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        if: env.MODIFIED_PYTHON_FILES != ''
         run: flake8 . && pylint --rcfile=.pylintrc ${{ env.PYTHON_FILES }}
       - name: Check typing with mypy
-        if: env.MODIFIED_PYTHON_FILES != ''
         run: mypy --config-file mypy.ini ${{ env.PYTHON_FILES }}
 
   test-lvm:
