@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_FILES: $(find . -name '*.py')
-      MODIFIED_PYTHON_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA -- | grep -E '\\.py$')
+      MODIFIED_PYTHON_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA -- | grep -E '\.py$')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
