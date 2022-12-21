@@ -7,14 +7,14 @@ env:
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
 
 jobs:
-  lint:
+  lint-ansible:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Install linters
+      - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
         run: |
@@ -23,13 +23,22 @@ jobs:
               -o -path "./tests/*" -name "*.yml" \
               -o -name "pile.yml" \
               -exec ansible-lint -c ./ansible-lint-dev.yml {} +
-      - name: Lint Python code
-        run: |
-          flake8 .
-          pylint --rcfile=.pylintrc $(find . -name "*.py")
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install Python linters
+        run: pip3.10 install flake8 pylint mypy
+      - name: Lint Python code style with flake8 and pylint
+        run: flake8 . && pylint --rcfile=.pylintrc $(find . -name "*.py")
+      - name: Check typing with mypy
+        run: mypy --config-file .mypy.ini $(find . -name "*.py")
 
   test-lvm:
-    needs: lint
+    needs: [lint-ansible, lint-python]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
