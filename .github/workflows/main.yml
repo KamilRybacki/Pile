@@ -14,7 +14,7 @@ jobs:
   lint-ansible:
     runs-on: ubuntu-latest
     env:
-      MODIFIED_ANSIBLE_FILES: $( ${{ env.MODIFIED_FILES }} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
+      MODIFIED_ANSIBLE_FILES: $( ${MODIFIED_FILES} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
     if: length("${MODIFIED_ANSIBLE_FILES} ") > 0
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     env:
-      MODIFIED_PYTHON_FILES: $( ${{ env.MODIFIED_FILES }} | grep -E '\.py$' )
+      MODIFIED_PYTHON_FILES: $( ${MODIFIED_FILES} | grep -E '\.py$' )
     if: length("${MODIFIED_PYTHON_FILES}") > 0
     steps:
       - uses: actions/checkout@v3
