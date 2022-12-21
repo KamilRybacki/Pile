@@ -26,23 +26,21 @@ jobs:
   lint-python:
     runs-on: ubuntu-latest
     env:
-      PYTHON_FILES: "$(find . -name '*.py')"
+      PYTHON_FILES: $(find . -name '*.py')
+      MODIFIED_PYTHON_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA -- | grep -E '\\.py$')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Check Python files
-        id: python_files_check
-        run: git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA -- | grep -E '\.py$'
       - name: Install Python linters
-        if: steps.python_files_check.outcome == 'success'
+        if: env.MODIFIED_PYTHON_FILES != ''
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        if: steps.python_files_check.outcome == 'success'
+        if: env.MODIFIED_PYTHON_FILES != ''
         run: flake8 . && pylint --rcfile=.pylintrc ${{ env.PYTHON_FILES }}
       - name: Check typing with mypy
-        if: steps.python_files_check.outcome == 'success'
+        if: env.MODIFIED_PYTHON_FILES != ''
         run: mypy --config-file mypy.ini ${{ env.PYTHON_FILES }}
 
   test-lvm:
