@@ -14,8 +14,8 @@ jobs:
   lint-ansible:
     runs-on: ubuntu-latest
     env:
-      MODIFIED_ANSIBLE_FILES: $( ${MODIFIED_FILES} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
-    if: length("${{ env.MODIFIED_ANSIBLE_FILES}} ") > 0
+      MODIFIED_ANSIBLE_FILES: $( ${{ env.MODIFIED_FILES }} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
+    if: length("${MODIFIED_ANSIBLE_FILES} ") > 0
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -24,12 +24,12 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: ansible-lint -c ./ansible-lint-dev.yml ${{ env.MODIFIED_ANSIBLE_FILES }}
+        run: ansible-lint -c ./ansible-lint-dev.yml ${MODIFIED_ANSIBLE_FILES}
   lint-python:
     runs-on: ubuntu-latest
     env:
-      MODIFIED_PYTHON_FILES: $( ${MODIFIED_FILES} | grep -E '\.py$' )
-    if: length("${{ env.MODIFIED_PYTHON_FILES }}") > 0
+      MODIFIED_PYTHON_FILES: $( ${{ env.MODIFIED_FILES }} | grep -E '\.py$' )
+    if: length("${MODIFIED_PYTHON_FILES}") > 0
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -38,9 +38,9 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc ${{ env.MODIFIED_PYTHON_FILES }}
+        run: flake8 . && pylint --rcfile=.pylintrc ${MODIFIED_PYTHON_FILES}
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini ${{ env.MODIFIED_PYTHON_FILES }}
+        run: mypy --config-file mypy.ini ${MODIFIED_PYTHON_FILES}
 
   test-lvm:
     needs: [lint-ansible, lint-python]
@@ -54,7 +54,7 @@ jobs:
       id: setup-disks
       env:
         DISK_SETUP_ARGS: ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.EMULATED_DISK_SIZE }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
-      run: python3.10 tests/storage/dummy_disks.py setup ${{ env.DISK_SETUP_ARGS }} >> $GITHUB_OUTPUT
+      run: python3.10 tests/storage/dummy_disks.py setup ${DISK_SETUP_ARGS} >> $GITHUB_OUTPUT
     - name: Show contents of Ansible inventory file
       run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} >> $GITHUB_OUTPUT
     - name: Check if disks were created
