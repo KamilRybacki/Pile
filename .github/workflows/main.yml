@@ -2,6 +2,7 @@ name: Setup and test LVM storage role with emulated disks
 
 on: [push]
 env:
+  MODIFIED_FILES: $(git diff --name-only $GITHUB_EVENT_PULL_REQUEST_BEFORE $GITHUB_EVENT_PULL_REQUEST_HEAD_SHA)
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
@@ -17,7 +18,7 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: ansible-lint -c ./ansible-lint-dev.yml $(git diff --name-only HEAD~1 | grep -E '\.ya?ml$')
+        run: ansible-lint -c ./ansible-lint-dev.yml $( echo "${MODIFIED_FILES}" | grep -E ".*\.ya?ml$" )
   lint-python:
     runs-on: ubuntu-latest
     steps:
@@ -28,9 +29,9 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc $(git diff --name-only HEAD~1 | grep -E '\.py$')
+        run: flake8 . && pylint --rcfile=.pylintrc $( echo "${MODIFIED_PYTHON_FILES}" | grep -E ".*\.py$" )
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini $(git diff --name-only HEAD~1 | grep -E '\.py$')
+        run: mypy --config-file mypy.ini $( echo "${MODIFIED_PYTHON_FILES}" | grep -E ".*\.py$" )
 
   test-lvm:
     needs: [lint-ansible, lint-python]
