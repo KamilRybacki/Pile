@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MODIFIED_ANSIBLE_FILES: $( ${MODIFIED_FILES} | ${ANSIBLE_FILE_CHECK} | xargs -I{} bash -c 'echo "{}"' )
-    if: contains(MODIFIED_ANSIBLE_FILES, 'yml')
+    if: contains("${MODIFIED_ANSIBLE_FILES}", 'yml')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MODIFIED_PYTHON_FILES: $( ${MODIFIED_FILES} | grep -E '\.py$' )
-    if: contains(MODIFIED_PYTHON_FILES, '.py')
+    if: contains("${MODIFIED_PYTHON_FILES}", '.py')
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
