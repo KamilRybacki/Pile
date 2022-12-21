@@ -37,9 +37,16 @@ jobs:
       with:
         python-version: '3.10'
     - name: Set up emulated disks
-      run: python3.10 tests/storage/dummy_disks.py setup ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.EMULATED_DISK_SIZE }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
-    - name: Show contents of Ansible inventory file
-      run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+      id: setup-disks
+      run: |
+        setup-log = $(python3.10 \
+          tests/storage/dummy_disks.py \
+            setup \
+            ${{ env.NUMBER_OF_EMULATED_DISKS }} \
+            ${{ env.EMULATED_DISK_SIZE }} \
+            ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} > setup.log 2>&1; echo $?)
+    - name: Show setup log and contents of Ansible inventory file
+      run: cat ${{ steps.setup-disks.outputs.setup-log }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
       run: ls -l /dev/loop* | wc -l | grep ${{ env.NUMBER_OF_EMULATED_DISKS }}
     - uses: dawidd6/action-ansible-playbook@v2

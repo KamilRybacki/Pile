@@ -98,23 +98,27 @@ if __name__ == "__main__":
 
     if sys.argv[0] == "cleanup":
         cleanup_loop_devices()
+        sys.exit(0)
     if sys.argv[0] == "setup":
         number_of_disks, input_disk_size = get_loop_devices_setup_config(sys.argv[1:])
         if number_of_disks is None or input_disk_size is None:
             DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
             sys.exit(1)
+    else:
+        DISKS_SETUP_LOG.error('Invalid command. Available commands: setup, cleanup')
+        sys.exit(1)
 
-        disks = setup_dummy_disks(number_of_disks, input_disk_size)
-        if len(disks) == 0:
-            DISKS_SETUP_LOG.error("No disks were created! Exiting...")
-            sys.exit(1)
+    disks = setup_dummy_disks(number_of_disks, input_disk_size)
+    if len(disks) == 0:
+        DISKS_SETUP_LOG.error("No disks were created! Exiting...")
+        sys.exit(1)
 
-        output_file_path: str = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_HOSTS_FILE_PATH
-        try:
-            with open(output_file_path, "w", encoding='utf-8'):
-                pass
-        except OSError:
-            DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
-            sys.exit(1)
+    output_file_path: str = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_HOSTS_FILE_PATH
+    try:
+        with open(output_file_path, "w", encoding='utf-8'):
+            pass
+    except OSError:
+        DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
+        sys.exit(1)
 
-        write_inventory_file_for_ansible(disks, output_file_path)
+    write_inventory_file_for_ansible(disks, output_file_path)
