@@ -28,8 +28,10 @@ jobs:
           python-version: '3.10'
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
-      - name: Lint Python code style with flake8 and pylint
-        run: flake8 . && pylint --rcfile=.pylintrc $( echo "${MODIFIED_FILES}" | grep -E ".*\.py$" )
+      - name: Lint Python code style with flake8
+        run: flake8 .
+      - name: Lint Python code style with pylint
+        run: pylint --rcfile=.pylintrc $( echo "${MODIFIED_FILES}" | grep -E ".*\.py$" )
       - name: Check typing with mypy
         run: mypy --config-file mypy.ini $( echo "${MODIFIED_FILES}" | grep -E ".*\.py$" )
 
