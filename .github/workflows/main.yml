@@ -33,9 +33,9 @@ jobs:
       - name: Lint Python code style with flake8
         run: flake8 .
       - name: Lint Python code style with pylint
-        run: pylint --rcfile=.pylintrc $( echo "${MODIFIED_PYTHON_FILES}" )
+        run: pylint --rcfile=.pylintrc ${MODIFIED_PYTHON_FILES}"
       - name: Check typing with mypy
-        run: mypy --config-file mypy.ini $( echo "${MODIFIED_PYTHON_FILES}" )
+        run: mypy --config-file mypy.ini ${MODIFIED_PYTHON_FILES}"
 
   test-lvm:
     needs: [lint-ansible, lint-python]
