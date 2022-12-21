@@ -24,15 +24,8 @@ def cleanup_loop_devices() -> None:
 
 
 def get_loop_devices_setup_config(arguments: list[str]) -> tuple[int | None, str | None]:
-    if len(arguments) == 1:
-        return DEFAULT_NUMBER_OF_DISKS, DEFAULT_DISK_SIZE
-    if len(arguments) == 2:
-        return int(arguments[1]), DEFAULT_DISK_SIZE
-    if len(arguments) == 3:
-        return int(arguments[1]), arguments[2]
-
-    n_disks: int | None = int(arguments[0]) if len(sys.argv) > 1 else DEFAULT_NUMBER_OF_DISKS
-    size: str | None = arguments[1] if len(sys.argv) > 2 else DEFAULT_DISK_SIZE
+    n_disks: int = int(arguments[0]) if arguments else DEFAULT_NUMBER_OF_DISKS
+    size: str = arguments[1] if len(arguments) > 1 else DEFAULT_DISK_SIZE
 
     if n_disks < 1:  # type: ignore
         DISKS_SETUP_LOG.error("You must provide a number of disks greater than 0")
