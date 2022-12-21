@@ -24,6 +24,10 @@ jobs:
       - name: Find modified Python files
         id: modified-python-files
         run: echo "MODIFIED_PYTHON_FILES=$( ${{ env.MODIFIED_FILES }} | grep -E '\.py$' )" >> $GITHUB_OUTPUT
+      - name: Show modified files
+        run: |
+          echo "Modified Ansible files: ${{ steps.modified-ansible-files.outputs.MODIFIED_ANSIBLE_FILES }}"
+          echo "Modified Python files: ${{ steps.modified-python-files.outputs.MODIFIED_PYTHON_FILES }}"
   lint-ansible:
     runs-on: ubuntu-latest
     needs: find-modified-files
