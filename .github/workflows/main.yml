@@ -39,13 +39,14 @@ jobs:
     - name: Set up emulated disks
       id: setup-disks
       run: |
-        setup-log=$(python3.10 \
+        echo "::set-output name=setup-log::$(python3.10 \
           tests/storage/dummy_disks.py \
             setup \
             ${{ env.NUMBER_OF_EMULATED_DISKS }} \
             ${{ env.EMULATED_DISK_SIZE }} \
-            ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} > setup.log 2>&1; echo $?)
-        echo "::set-output name=setup-log::${setup.log}"
+            ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} > setup.log 2>&1;
+          echo $?
+        )"
     - name: Show setup log and contents of Ansible inventory file
       run: cat ${{ steps.setup-disks.outputs.setup-log }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
     - name: Check if disks were created
