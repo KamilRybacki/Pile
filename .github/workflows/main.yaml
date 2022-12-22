@@ -20,7 +20,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Get Ansible changed files
-      id: changed-ansible-files
+      id: changed_ansible_files
       uses: tj-actions/changed-files@v23
       with:
         sha: ${{ github.sha }}
@@ -36,7 +36,7 @@ jobs:
           const path = require('path')
           return require(path.resolve('.github/workflows/scripts/stageAnsibleFiles.js'))({context})
     - name: Get Python changed files
-      id: changed-python-files
+      id: changed_python_files
       uses: tj-actions/changed-files@v23
       with:
         sha: ${{ github.sha }}
