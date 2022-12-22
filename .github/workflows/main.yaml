@@ -34,7 +34,7 @@ jobs:
         github-token: ${{secrets.PILE_TOKEN}}
         script: |
           const path = require('path')
-          return require(path.resolve('scripts/stageAnsibleFiles.js'))({context})
+          return require(path.resolve('.github/workflows/scripts/stageAnsibleFiles.js'))({context})
     - name: Get Python changed files
       id: changed-python-files
       uses: tj-actions/changed-files@v23
@@ -50,7 +50,7 @@ jobs:
         github-token: ${{secrets.PILE_TOKEN}}
         script: |
           const path = require('path')
-          return require(path.resolve('scripts/stagePythonFiles.js'))({context})
+          return require(path.resolve('.github/workflows/scripts/stagePythonFiles.js'))({context})
   lint-ansible:
     runs-on: ubuntu-latest
     needs: check-changed-files
