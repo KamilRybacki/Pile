@@ -71,10 +71,13 @@ def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str
 
 def setup_dummy_disk(index: int, size: str) -> str:
     loop_device_source: str = f"loop_device{index}.img"
-    loop_device_path: str = f"/dev/loop{index}"
-    DISKS_SETUP_LOG.debug(f"Creating {loop_device_source} of size {size} and mounting it on {loop_device_path}")
     subprocess.run(['truncate', '-s', size, loop_device_source], check=True)
-    subprocess.run(["sudo", "losetup", loop_device_path, loop_device_source], check=True)
+
+    loop_device_path_bytes: subprocess.CompletedProcess[bytes] = subprocess.run(["sudo", "losetup", "-f"], capture_output=True, check=True)
+    loop_device_path: str = loop_device_path_bytes.stdout.decode().strip()
+    DISKS_SETUP_LOG.debug(f"Creating {loop_device_source} of size {size} and mounting it on {loop_device_path}")
+
+    subprocess.run(["sudo", "losetup", "-f", loop_device_source], check=True)
     return loop_device_path
 
 
