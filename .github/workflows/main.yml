@@ -7,6 +7,7 @@ env:
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
 
 jobs:
+  initialize-sha:
   check-changed-files:
     runs-on: ubuntu-latest
     outputs:
@@ -18,7 +19,7 @@ jobs:
       uses: tj-actions/changed-files@v23
       with:
         sha: ${{ github.sha }}
-        base_sha: ${{ secrets.ANSIBLE_REFERENCE_SHA }}
+        base_sha: ${{ secrets.ANSIBLE_REFERENCE_SHA || github.event.pull_request.base.sha }}
         files: |
           *.yml
           **/*.yml
@@ -34,7 +35,7 @@ jobs:
       uses: tj-actions/changed-files@v23
       with:
         sha: ${{ github.sha }}
-        base_sha: ${{ secrets.PYTHON_REFERENCE_SHA }}
+        base_sha: ${{ secrets.PYTHON_REFERENCE_SHA || github.event.pull_request.base.sha }}
         files: |
           *.py
           **/*.py
