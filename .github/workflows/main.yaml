@@ -74,10 +74,13 @@ jobs:
       - name: Install Python linters
         run: pip3.10 install flake8 pylint mypy
       - name: Lint Python code style with flake8
+        if: always()
         run: flake8 .
       - name: Lint Python code style with pylint
+        if: always()
         run: pylint --rcfile .pylintrc ${{ needs.check-changed-files.outputs.changed_py_files }}
       - name: Check typing with mypy
+        if: always()
         run: mypy --config-file mypy.ini ${{ needs.check-changed-files.outputs.changed_py_files }}
 
   test-lvm:
