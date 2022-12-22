@@ -29,7 +29,7 @@ def get_setup_config(arguments: list[str]) -> dict:
 
     cmd: str = arguments[0]
     n_disks: int = int(arguments[1]) if arguments > 1 else DEFAULT_NUMBER_OF_DISKS
-    size: str= arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
+    size: str = arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
     path: str = arguments[3] if len(arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
 
     if cmd not in ["setup", "cleanup"]:
