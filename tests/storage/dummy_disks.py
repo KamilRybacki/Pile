@@ -86,7 +86,6 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
 
 
 if __name__ == "__main__":
-    DISKS_SETUP_LOG.debug(sys.argv)
     if len(sys.argv) < 1:
         raise ValueError("You must provide a command: setup or cleanup")
 
@@ -99,7 +98,7 @@ if __name__ == "__main__":
             DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
             sys.exit(1)
     if sys.argv[0] not in ["setup", "cleanup"]:
-        DISKS_SETUP_LOG.error('Invalid command. Available commands: setup, cleanup')
+        DISKS_SETUP_LOG.error(f'Invalid command {sys.argv[0]}. Available commands: setup, cleanup')
         sys.exit(1)
 
     disks = setup_dummy_disks(number_of_disks, input_disk_size)  # type: ignore
