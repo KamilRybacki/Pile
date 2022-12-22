@@ -32,7 +32,7 @@ jobs:
       with:
         name: ANSIBLE_REFERENCE_SHA
         value: ${{ github.sha }}
-        pa_token: ${{ github.token }}
+        pa_token: ${{ secrets.PILE_TOKEN }}
     - name: Get Python changed files
       id: changed-py-files
       uses: tj-actions/changed-files@v23
@@ -48,7 +48,7 @@ jobs:
       with:
         name: PYTHON_REFERENCE_SHA
         value: ${{ github.sha }}
-        pa_token: ${{ github.token }}
+        pa_token: ${{ secrets.PILE_TOKEN }}
   lint-ansible:
     runs-on: ubuntu-latest
     needs: check-changed-files
