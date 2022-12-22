@@ -4,7 +4,7 @@ on: [push]
 env:
   EMULATED_DISK_SIZE: 10M
   NUMBER_OF_EMULATED_DISKS: 4
-  ANSIBLE_INVENTORY_FILE_PATH: "$GITHUB_WORKSPACE/hosts.yml"
+  ANSIBLE_INVENTORY_FILE_PATH: hosts.yml
 
 jobs:
   check-changed-files:
