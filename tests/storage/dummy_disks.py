@@ -4,7 +4,7 @@ import sys
 
 DEFAULT_NUMBER_OF_DISKS = 4
 DEFAULT_DISK_SIZE = '1M'
-DEFAULT_HOSTS_FILE_PATH = "/hosts.yml"
+DEFAULT_HOSTS_FILE_PATH = "hosts.yml"
 
 DISKS_SETUP_LOG = logging.getLogger("DISKS")
 
