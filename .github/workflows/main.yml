@@ -7,7 +7,6 @@ env:
   ANSIBLE_INVENTORY_FILE_PATH: /hosts.yml
 
 jobs:
-  initialize-sha:
   check-changed-files:
     runs-on: ubuntu-latest
     outputs:
