@@ -51,11 +51,11 @@ def get_setup_config(arguments: list[str]) -> dict:
 def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str]:
     DISKS_SETUP_LOG.debug(f"Setting up {number_of_disks_to_setup} disks of size {disk_size}")
     current_loop_devices_list_bytes: subprocess.CompletedProcess[bytes] = subprocess.run(["sudo", "losetup", "-a"], capture_output=True, check=True)
-    last_loop_device_created_by_system_index = int(
-        [ line.split(":")[0] for line in decode_loop_device_paths(current_loop_devices_list_bytes)][-1]
-            .split("/")[-1]
-            .replace("loop", "")
-    )
+    current_loop_devices_list: list[str] = [
+        line.split(":")[0]
+        for line in decode_loop_device_paths(current_loop_devices_list_bytes)
+    ]
+    last_loop_device_created_by_system_index = int(current_loop_devices_list[-1].split("/")[-1].replace("loop", ""))
     new_loop_devices_indices = range(last_loop_device_created_by_system_index, last_loop_device_created_by_system_index + number_of_disks_to_setup)
     loop_devices = [setup_dummy_disk(i, disk_size) for i in new_loop_devices_indices]
 
@@ -111,6 +111,7 @@ def cleanup_loop_devices() -> None:
 
 def decode_loop_device_paths(paths: subprocess.CompletedProcess[bytes]) -> list[str]:
     return paths.stdout.decode().strip().split("\n")
+
 
 if __name__ == "__main__":
     setup_config = get_setup_config(sys.argv[1:])
