@@ -23,31 +23,60 @@ def cleanup_loop_devices() -> None:
         subprocess.run(["sudo", "losetup", "-d", loop_device], check=True)
 
 
-def get_loop_devices_setup_config(arguments: list[str]) -> tuple[int | None, str | None]:
-    n_disks: int | None = int(arguments[0]) if arguments else DEFAULT_NUMBER_OF_DISKS
-    size: str | None = arguments[1] if len(arguments) > 1 else DEFAULT_DISK_SIZE
+def get_setup_config(arguments: list[str]) -> dict:
+    if not arguments:
+        raise ValueError("You must provide a command: setup or cleanup")
 
-    if n_disks < 1:  # type: ignore
+    cmd: str = arguments[0]
+    n_disks: int = int(arguments[1]) if arguments > 1 else DEFAULT_NUMBER_OF_DISKS
+    size: str= arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
+    path: str = arguments[3] if len(arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
+
+    if cmd not in ["setup", "cleanup"]:
+        DISKS_SETUP_LOG.error(f'Invalid command {cmd}. Available commands: setup, cleanup')
+        sys.exit(1)
+
+    if n_disks < 1:
         DISKS_SETUP_LOG.error("You must provide a number of disks greater than 0")
         n_disks = None
-    if size[-1] not in ['M', 'G', 'T']:  # type: ignore
+    if size[-1] not in ['M', 'G', 'T']:
         DISKS_SETUP_LOG.error("You must provide a disk size with a unit of measure: M, G, T")
         size = None
-    if size[-1] == 'T':  # type: ignore
+    if size[-1] == 'T':
         DISKS_SETUP_LOG.error("You must provide a disk size less than 1T")
         size = None
-    if not size[:-1].isnumeric():  # type: ignore
+    if not size[:-1].isnumeric():
         DISKS_SETUP_LOG.error("You must provide a disk size with a numeric value")
         size = None
-    if int(size[:-1]) < 1:  # type: ignore
+    if int(size[:-1]) < 1:
         DISKS_SETUP_LOG.error("You must provide a disk size greater than 0")
         size = None
-    return n_disks, size
+
+    try:
+        with open(path, "w", encoding='utf-8'):
+            pass
+    except OSError:
+        DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
+        sys.exit(1)
+
+    if n_disks is None or size is None:
+        DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
+        sys.exit(1)
+
+    return {
+        'command': cmd,
+        'number_of_disks': n_disks,
+        'disk_size': size,
+        'output_file_path': path
+    }
 
 
 def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str]:
     DISKS_SETUP_LOG.debug(f"Setting up {number_of_disks_to_setup} disks of size {disk_size}")
     loop_devices = [setup_dummy_disk(i, disk_size) for i in range(number_of_disks_to_setup)]
+    if not loop_devices:
+        DISKS_SETUP_LOG.error("No disks were created! Exiting...")
+        sys.exit(1)
     for loop_device in loop_devices:
         DISKS_SETUP_LOG.debug(f"Creating ext4 filesystem on {loop_device}")
         subprocess.run(["sudo", "mkfs.ext4", loop_device], check=True)
@@ -86,33 +115,9 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
 
 
 if __name__ == "__main__":
-    disks_setup_arguments = sys.argv[1:]
-    if len(disks_setup_arguments) < 1:
-        raise ValueError("You must provide a command: setup or cleanup")
-
-    if disks_setup_arguments[0] == "cleanup":
+    setup_config = get_setup_config(sys.argv[1:])
+    if setup_config['command'] == "cleanup":
         cleanup_loop_devices()
-        sys.exit(0)
-    if disks_setup_arguments[0] == "setup":
-        number_of_disks, input_disk_size = get_loop_devices_setup_config(disks_setup_arguments[1:])
-        if number_of_disks is None or input_disk_size is None:
-            DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
-            sys.exit(1)
-    if disks_setup_arguments[0] not in ["setup", "cleanup"]:
-        DISKS_SETUP_LOG.error(f'Invalid command {sys.argv[0]}. Available commands: setup, cleanup')
-        sys.exit(1)
-
-    disks = setup_dummy_disks(number_of_disks, input_disk_size)  # type: ignore
-    if len(disks) == 0:
-        DISKS_SETUP_LOG.error("No disks were created! Exiting...")
-        sys.exit(1)
-
-    output_file_path: str = disks_setup_arguments[3] if len(disks_setup_arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
-    try:
-        with open(output_file_path, "w", encoding='utf-8'):
-            pass
-    except OSError:
-        DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
-        sys.exit(1)
-
-    write_inventory_file_for_ansible(disks, output_file_path)
+    if setup_config['command'] == "setup":
+        disks = setup_dummy_disks(setup_config['number_of_disks'], setup_config['disk_size'])  # type: ignore
+        write_inventory_file_for_ansible(disks, setup_config['output_file_path'])
