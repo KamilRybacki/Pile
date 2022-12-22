@@ -99,8 +99,6 @@ jobs:
       run: python3.10 tests/storage/dummy_disks.py setup ${DISK_SETUP_ARGS} >> $GITHUB_OUTPUT
     - name: Show contents of Ansible inventory file
       run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} >> $GITHUB_OUTPUT
-    - name: Check if disks were created
-      run: ls -l /dev/loop* | wc -l | grep ${{ env.NUMBER_OF_EMULATED_DISKS }}
     - uses: dawidd6/action-ansible-playbook@v2
       id: lvm-ansible-playbook
       with:

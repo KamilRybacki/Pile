@@ -81,21 +81,19 @@ def setup_dummy_disk(index: int, size: str) -> str:
 def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
     DISKS_SETUP_LOG.debug(f"Writing inventory file to {path}")
     with open(path, "w", encoding='utf-8') as inventory_file:
-        inventory_file.write("""
-        pilehost:
-            hosts:
-                pile:
-                    ansible_host: 127.0.0.1
-                    ansible_connection: local
-                    ansible_python_interpreter: /usr/bin/python3
-                    pile_username: test
-                    pile_group: test
-                    pile_vg_name: testvg
-                    disks:
-        """)
+        inventory_file.write("pilehost:\n")
+        inventory_file.write("    hosts:")
+        inventory_file.write("        pile:")
+        inventory_file.write("            ansible_host: 127.0.0.1")
+        inventory_file.write("            ansible_connection: local")
+        inventory_file.write("            ansible_python_interpreter: /usr/bin/python3")
+        inventory_file.write("            pile_username: test")
+        inventory_file.write("            pile_group: test")
+        inventory_file.write("            pile_vg_name: testvg")
+        inventory_file.write("            disks:")
         for device in devices:
-            inventory_file.write(f"\t\t\t\t - {device}")
-        inventory_file.write("\t\t\t s3_combined_volume: /mnt/data")
+            inventory_file.write(f"                - {device}")
+        inventory_file.write("            s3_combined_volume: /mnt/data")
 
 
 def cleanup_loop_devices() -> None:
