@@ -13,6 +13,9 @@ jobs:
       changed_py_files: ${{ steps.changed-py-files.outputs.all_changed_files }}
       changed_ansible_files: ${{ steps.changed-ansible-files.outputs.all_changed_files }}
     steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Get Ansible changed files
       id: changed-ansible-files
       uses: tj-actions/changed-files@v23
