@@ -81,6 +81,7 @@ jobs:
         run: mypy --config-file mypy.ini ${{ needs.check-changed-files.outputs.changed_py_files }}
 
   test-lvm:
+    if: ${{ always() }}
     needs: [lint-ansible, lint-python]
     runs-on: ubuntu-latest
     steps:
