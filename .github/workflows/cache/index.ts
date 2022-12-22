@@ -1,5 +1,5 @@
 
-module.exports = async (context) => {
+module.exports = async ({context}) => {
   console.log('Hello, world!');
   console.log('The event name is: ' + context.eventName);
   console.log('The ref is: ' + context.ref);

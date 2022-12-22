@@ -33,7 +33,7 @@ jobs:
         files: |
           *.py
           **/*.py
-    - name: Chech and update staged files cache
+    - name: Check and update staged files cache
       uses: actions/github-script@v5
       with:
         script: |
