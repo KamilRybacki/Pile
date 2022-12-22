@@ -86,18 +86,19 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
+    disks_setup_arguments = sys.argv[1:]
+    if len(disks_setup_arguments) < 1:
         raise ValueError("You must provide a command: setup or cleanup")
 
-    if sys.argv[0] == "cleanup":
+    if disks_setup_arguments[0] == "cleanup":
         cleanup_loop_devices()
         sys.exit(0)
-    if sys.argv[0] == "setup":
-        number_of_disks, input_disk_size = get_loop_devices_setup_config(sys.argv[1:])
+    if disks_setup_arguments[0] == "setup":
+        number_of_disks, input_disk_size = get_loop_devices_setup_config(disks_setup_arguments[1:])
         if number_of_disks is None or input_disk_size is None:
             DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
             sys.exit(1)
-    if sys.argv[0] not in ["setup", "cleanup"]:
+    if disks_setup_arguments[0] not in ["setup", "cleanup"]:
         DISKS_SETUP_LOG.error(f'Invalid command {sys.argv[0]}. Available commands: setup, cleanup')
         sys.exit(1)
 
@@ -106,7 +107,7 @@ if __name__ == "__main__":
         DISKS_SETUP_LOG.error("No disks were created! Exiting...")
         sys.exit(1)
 
-    output_file_path: str = sys.argv[2] if len(sys.argv) > 2 else DEFAULT_HOSTS_FILE_PATH
+    output_file_path: str = disks_setup_arguments[3] if len(disks_setup_arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
     try:
         with open(output_file_path, "w", encoding='utf-8'):
             pass
