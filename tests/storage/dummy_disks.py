@@ -58,12 +58,9 @@ def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str
     last_loop_device_created_by_system_index = int(current_loop_devices_list[-1].split("/")[-1].replace("loop", ""))
     new_loop_devices_indices = range(last_loop_device_created_by_system_index, last_loop_device_created_by_system_index + number_of_disks_to_setup)
     loop_devices = [setup_dummy_disk(i, disk_size) for i in new_loop_devices_indices]
-
     if not loop_devices:
         raise RuntimeError("No disks were created!")
-    for loop_device in loop_devices:
-        DISKS_SETUP_LOG.debug(f"Creating ext4 filesystem on {loop_device}")
-        subprocess.run(["sudo", "mkfs.ext4", loop_device], check=True)
+
     DISKS_SETUP_LOG.debug(f"Created the following {len(loop_devices)} disks:")
     DISKS_SETUP_LOG.debug(loop_devices)
     return loop_devices
