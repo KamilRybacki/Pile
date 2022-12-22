@@ -28,39 +28,36 @@ def get_setup_config(arguments: list[str]) -> dict:
         raise ValueError("You must provide a command: setup or cleanup")
 
     cmd: str = arguments[0]
-    n_disks: int = int(arguments[1]) if arguments > 1 else DEFAULT_NUMBER_OF_DISKS
-    size: str = arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
-    path: str = arguments[3] if len(arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
-
     if cmd not in ["setup", "cleanup"]:
         DISKS_SETUP_LOG.error(f'Invalid command {cmd}. Available commands: setup, cleanup')
         sys.exit(1)
 
+    n_disks: int = int(arguments[1]) if len(arguments) > 1 else DEFAULT_NUMBER_OF_DISKS
+    size: str = arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
+
     if n_disks < 1:
         DISKS_SETUP_LOG.error("You must provide a number of disks greater than 0")
-        n_disks = None
+        sys.exit(1)
     if size[-1] not in ['M', 'G', 'T']:
         DISKS_SETUP_LOG.error("You must provide a disk size with a unit of measure: M, G, T")
-        size = None
+        sys.exit(1)
     if size[-1] == 'T':
         DISKS_SETUP_LOG.error("You must provide a disk size less than 1T")
-        size = None
+        sys.exit(1)
     if not size[:-1].isnumeric():
         DISKS_SETUP_LOG.error("You must provide a disk size with a numeric value")
-        size = None
+        sys.exit(1)
     if int(size[:-1]) < 1:
         DISKS_SETUP_LOG.error("You must provide a disk size greater than 0")
-        size = None
+        sys.exit(1)
+
+    path: str = arguments[3] if len(arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
 
     try:
         with open(path, "w", encoding='utf-8'):
             pass
     except OSError:
         DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
-        sys.exit(1)
-
-    if n_disks is None or size is None:
-        DISKS_SETUP_LOG.error("Invalid arguments! Exiting...")
         sys.exit(1)
 
     return {
