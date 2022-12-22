@@ -36,29 +36,23 @@ def get_setup_config(arguments: list[str]) -> dict:
     size: str = arguments[2] if len(arguments) > 2 else DEFAULT_DISK_SIZE
 
     if n_disks < 1:
-        DISKS_SETUP_LOG.error("You must provide a number of disks greater than 0")
-        sys.exit(1)
+        raise ValueError("You must provide a number of disks greater than 0")
     if size[-1] not in ['M', 'G', 'T']:
-        DISKS_SETUP_LOG.error("You must provide a disk size with a unit of measure: M, G, T")
-        sys.exit(1)
+        raise ValueError("You must provide a disk size with a unit of measure: M, G, T")
     if size[-1] == 'T':
-        DISKS_SETUP_LOG.error("You must provide a disk size less than 1T")
-        sys.exit(1)
+        raise ValueError("You must provide a disk size less than 1T")
     if not size[:-1].isnumeric():
-        DISKS_SETUP_LOG.error("You must provide a disk size with a numeric value")
-        sys.exit(1)
+        raise ValueError("You must provide a disk size with a numeric value")
     if int(size[:-1]) < 1:
-        DISKS_SETUP_LOG.error("You must provide a disk size greater than 0")
-        sys.exit(1)
+        raise ValueError("You must provide a disk size greater than 0")
 
     path: str = arguments[3] if len(arguments) > 3 else DEFAULT_HOSTS_FILE_PATH
 
     try:
         with open(path, "w", encoding='utf-8'):
             pass
-    except OSError:
-        DISKS_SETUP_LOG.error("Invalid output file path! Exiting...")
-        sys.exit(1)
+    except OSError as exception:
+        raise OSError(f"Invalid output file path: {path}") from exception
 
     return {
         'command': cmd,
@@ -72,8 +66,7 @@ def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str
     DISKS_SETUP_LOG.debug(f"Setting up {number_of_disks_to_setup} disks of size {disk_size}")
     loop_devices = [setup_dummy_disk(i, disk_size) for i in range(number_of_disks_to_setup)]
     if not loop_devices:
-        DISKS_SETUP_LOG.error("No disks were created! Exiting...")
-        sys.exit(1)
+        raise RuntimeError("No disks were created!")
     for loop_device in loop_devices:
         DISKS_SETUP_LOG.debug(f"Creating ext4 filesystem on {loop_device}")
         subprocess.run(["sudo", "mkfs.ext4", loop_device], check=True)
