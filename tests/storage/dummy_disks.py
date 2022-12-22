@@ -77,7 +77,7 @@ def setup_dummy_disk(index: int, size: str) -> str:
     loop_device_path: str = loop_device_path_bytes.stdout.decode().strip()
     DISKS_SETUP_LOG.debug(f"Creating {loop_device_source} of size {size} and mounting it on {loop_device_path}")
 
-    subprocess.run(["sudo", "losetup", "-f", loop_device_source], check=True)
+    subprocess.run(["sudo", "losetup", loop_device_path, loop_device_source], check=True)
     return loop_device_path
 
 
