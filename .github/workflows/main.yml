@@ -8,6 +8,7 @@ env:
 
 jobs:
   check-changed-files:
+    permissions: write-all
     runs-on: ubuntu-latest
     outputs:
       changed_py_files: ${{ steps.changed-py-files.outputs.all_changed_files }}
