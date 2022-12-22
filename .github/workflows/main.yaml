@@ -61,7 +61,7 @@ jobs:
       - name: Install Ansible Lint
         run: pip3.10 install ansible-lint flake8 pylint
       - name: Lint Ansible files
-        run: ansible-lint -c ${{ needs.check-changed-files.outputs.changed_ansible_files }}
+        run: ansible-lint -c ansible-lint.dev.yaml ${{ needs.check-changed-files.outputs.changed_ansible_files }}
   lint-python:
     runs-on: ubuntu-latest
     needs: check-changed-files
