@@ -9,20 +9,6 @@ DEFAULT_HOSTS_FILE_PATH = "hosts.yml"
 DISKS_SETUP_LOG = logging.getLogger("DISKS")
 
 
-def cleanup_loop_devices() -> None:
-    def decode_loop_device_paths(paths: subprocess.CompletedProcess[bytes]) -> list[str]:
-        return paths.stdout.decode().strip().split("\n")
-
-    loop_devices_list_bytes: subprocess.CompletedProcess[bytes] = subprocess.run(["sudo", "losetup", "-a"], capture_output=True, check=True)
-    loop_devices = [
-        line.split(":")[0]
-        for line in decode_loop_device_paths(loop_devices_list_bytes)
-    ]
-    for loop_device in loop_devices:
-        DISKS_SETUP_LOG.debug(f"Cleaning up {loop_device}")
-        subprocess.run(["sudo", "losetup", "-d", loop_device], check=True)
-
-
 def get_setup_config(arguments: list[str]) -> dict:
     if not arguments:
         raise ValueError("You must provide a command: setup or cleanup")
@@ -64,7 +50,15 @@ def get_setup_config(arguments: list[str]) -> dict:
 
 def setup_dummy_disks(number_of_disks_to_setup: int, disk_size: str) -> list[str]:
     DISKS_SETUP_LOG.debug(f"Setting up {number_of_disks_to_setup} disks of size {disk_size}")
-    loop_devices = [setup_dummy_disk(i, disk_size) for i in range(number_of_disks_to_setup)]
+    current_loop_devices_list_bytes: subprocess.CompletedProcess[bytes] = subprocess.run(["sudo", "losetup", "-a"], capture_output=True, check=True)
+    last_loop_device_created_by_system_index = int(
+        [ line.split(":")[0] for line in decode_loop_device_paths(current_loop_devices_list_bytes)][-1]
+            .split("/")[-1]
+            .replace("loop", "")
+    )
+    new_loop_devices_indices = range(last_loop_device_created_by_system_index, last_loop_device_created_by_system_index + number_of_disks_to_setup)
+    loop_devices = [setup_dummy_disk(i, disk_size) for i in new_loop_devices_indices]
+
     if not loop_devices:
         raise RuntimeError("No disks were created!")
     for loop_device in loop_devices:
@@ -103,6 +97,20 @@ def write_inventory_file_for_ansible(devices: list[str], path: str) -> None:
             inventory_file.write(f"\t\t\t\t - {device}")
         inventory_file.write("\t\t\t s3_combined_volume: /mnt/data")
 
+
+def cleanup_loop_devices() -> None:
+    loop_devices_list_bytes: subprocess.CompletedProcess[bytes] = subprocess.run(["sudo", "losetup", "-a"], capture_output=True, check=True)
+    loop_devices = [
+        line.split(":")[0]
+        for line in decode_loop_device_paths(loop_devices_list_bytes)
+    ]
+    for loop_device in loop_devices:
+        DISKS_SETUP_LOG.debug(f"Cleaning up {loop_device}")
+        subprocess.run(["sudo", "losetup", "-d", loop_device], check=True)
+
+
+def decode_loop_device_paths(paths: subprocess.CompletedProcess[bytes]) -> list[str]:
+    return paths.stdout.decode().strip().split("\n")
 
 if __name__ == "__main__":
     setup_config = get_setup_config(sys.argv[1:])
