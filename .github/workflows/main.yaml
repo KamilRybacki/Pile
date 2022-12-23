@@ -1,0 +1,105 @@
+name: Test LVM
+
+on: [push]
+env:
+  EMULATED_DISK_SIZE: 10M
+  NUMBER_OF_EMULATED_DISKS: 4
+  ANSIBLE_INVENTORY_FILE_PATH: hosts.yml
+
+jobs:
+  check-changed-files:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    outputs:
+      changed_python_files: ${{ steps.changed-python-files.outputs.all_changed_files }}
+      changed_ansible_files: ${{ steps.changed-ansible-files.outputs.all_changed_files }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get Ansible changed files
+      id: changed_ansible_files
+      uses: tj-actions/changed-files@v23
+      with:
+        sha: ${{ github.sha }}
+        files: |
+          *.yml
+          **/*.yml
+    - name: Get Python changed files
+      id: changed_python_files
+      uses: tj-actions/changed-files@v23
+      with:
+        sha: ${{ github.sha }}
+        files: |
+          *.py
+          **/*.py
+    - name: Check and update staged files cache
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const cachingHandler = require('.github/workflows/cache/index.ts');
+          cachingHandler({context, github});
+  # lint-ansible:
+  #   runs-on: ubuntu-latest
+  #   needs: check-changed-files
+  #   if: ${{ needs.check-changed-files.outputs.changed_ansible_files != '' }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #     - name: Install Ansible Lint
+  #       run: pip3.10 install ansible-lint flake8 pylint
+  #     - name: Lint Ansible files
+  #       run: ansible-lint -c ansible-lint.dev.yaml ${{ needs.check-changed-files.outputs.changed_ansible_files }}
+  # lint-python:
+  #   runs-on: ubuntu-latest
+  #   needs: check-changed-files
+  #   if: ${{ needs.check-changed-files.outputs.changed_python_files != '' }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #     - name: Install Python linters
+  #       run: pip3.10 install flake8 pylint mypy
+  #     - name: Lint Python code style with flake8
+  #       if: always()
+  #       run: flake8 .
+  #     - name: Lint Python code style with pylint
+  #       if: always()
+  #       run: pylint --rcfile .pylintrc ${{ needs.check-changed-files.outputs.changed_python_files }}
+  #     - name: Check typing with mypy
+  #       if: always()
+  #       run: mypy --config-file mypy.ini ${{ needs.check-changed-files.outputs.changed_python_files }}
+  # # clean-staged-files:
+  # #   runs-on: ubuntu-latest
+  # #   needs: [lint-ansible, lint-python]
+  # #   steps:
+  # #   - uses: actions/checkout@v3
+
+  # test-lvm:
+  #   if: ${{ always() }}
+  #   needs: [lint-ansible, lint-python]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #   - uses: actions/setup-python@v4
+  #     with:
+  #       python-version: '3.10'
+  #   - name: Set up emulated disks
+  #     id: setup-disks
+  #     env:
+  #       DISK_SETUP_ARGS: ${{ env.NUMBER_OF_EMULATED_DISKS }} ${{ env.EMULATED_DISK_SIZE }} ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+  #     run: python3.10 tests/storage/dummy_disks.py setup ${DISK_SETUP_ARGS} >> $GITHUB_OUTPUT
+  #   - name: Show contents of Ansible inventory file
+  #     run: cat ${{ env.ANSIBLE_INVENTORY_FILE_PATH }} >> $GITHUB_OUTPUT
+  #   - uses: dawidd6/action-ansible-playbook@v2
+  #     id: lvm-ansible-playbook
+  #     with:
+  #       playbook: tests/storage/main.yml
+  #       options: --inventory ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}
+  #   - name: Clean up loop devices
+  #     run: python3.10 tests/storage/dummy_disks.py cleanup
+  #   - name: Remove generated hosts file
+  #     run: rm -f ${{ env.ANSIBLE_INVENTORY_FILE_PATH }}

@@ -1,0 +1,20 @@
+---
+- name: Check if hard drive is formatted for Linux LVM
+  ansible.builtin.shell: "fdisk -l {{ disk }} | grep 8e"
+  register: lvm_check
+  ignore_errors: true
+
+- name: Format hard drive for Linux LVM
+  community.general.parted:
+    device: "{{ disk }}"
+    flags: [ lvm ]
+    state: present
+    number: 1
+  when: lvm_check.stdout == ''
+
+- name: Prepare formatted device for LVM
+  ansible.builtin.shell: "pvcreate {{ disk }}1"
+  args:
+    creates: "{{ disk }}1"
+  register: lvm_prepare
+  when: lvm_check.stdout == ''

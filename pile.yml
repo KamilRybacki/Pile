@@ -1,0 +1,8 @@
+---
+- name: Setup Pile on specified host
+  vars_files: vault
+  hosts: pilehost
+  become: true
+  become_user: root
+  roles:
+    - makepile

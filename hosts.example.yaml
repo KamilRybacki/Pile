@@ -1,0 +1,13 @@
+pilehost:
+  hosts:
+    pile:
+      # ansible_host:
+      # ansible_connection:
+      # ansible_become_pass:
+      # ansible_python_interpreter:
+      # pile_username:
+      # pile_group:
+      # pile_vg_name:
+      # disks:
+      #  - ...
+      # s3_combined_volume:

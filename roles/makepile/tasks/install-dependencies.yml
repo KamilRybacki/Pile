@@ -1,0 +1,21 @@
+---
+- name: Install docker-compose using pip
+  ansible.builtin.pip:
+    name: docker-compose
+
+- name: Create Docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add "{{ pile_username }}" to Docker group
+  ansible.builtin.user:
+    name: "{{ pile_username }}"
+    groups: docker
+    append: true
+
+- name: Start and enable Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true

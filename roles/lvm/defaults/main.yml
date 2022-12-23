@@ -1,0 +1,3 @@
+fstab_file: /tmp/tmp.fstab
+mount_filesystem: ext4
+mount_mode: 0755
